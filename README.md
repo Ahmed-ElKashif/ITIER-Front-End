@@ -1,97 +1,154 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# itier — Study Tracker for ITI Students
 
-# Getting Started
+Mobile-first study tracking platform for ITI students and supervisors.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Features
 
-## Step 1: Start Metro
+### For Students
+- 📝 Log daily study entries (subject, hours, notes)
+- 📊 View study history with total statistics
+- 🏆 Daily/weekly leaderboards (Codeforces-style)
+- 💬 Daily motivational programming quotes
+- 📈 Weekly and monthly progress tracking
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+### For Supervisors
+- 👥 Monitor all students in your track
+- 📊 Track-level analytics (average hours, top subject)
+- 🔍 Search and filter students by name/username
+- 📈 View individual student details and subject breakdown
+- 🏆 Track leaderboard view
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Tech Stack
 
-```sh
-# Using npm
-npm start
+**Frontend (Mobile):**
+- React Native 0.85 + TypeScript
+- React Navigation (Stack + Bottom Tabs)
+- React Hook Form + Yup validation
+- Axios (HTTP client)
+- AsyncStorage (token persistence)
 
-# OR using Yarn
-yarn start
+**Backend (API):**
+- Node.js + Express + TypeScript
+- PostgreSQL + Prisma ORM
+- JWT Authentication
+- bcrypt password hashing
+
+## Prerequisites
+
+- Node.js >= 22.11.0
+- PostgreSQL database (Supabase / Railway / Local)
+- React Native development environment
+- **Expo Go** app installed on your physical Android/iOS device
+- Node.js >= 18.0.0
+
+## Setup Instructions
+
+### 1. Backend Setup
+
+```bash
+# Navigate to backend folder
+cd study-tracker-backend
+
+# Install dependencies
+npm install
+
+# Create .env file
+cp .env.example .env
+# Edit .env with your DATABASE_URL and JWT_SECRET
+
+# Run migrations
+npx prisma migrate dev
+npx prisma generate
+
+# Seed demo data
+npx prisma db seed
+
+# Start server
+npm run dev
 ```
 
-## Step 2: Build and run your app
+The server runs at `http://localhost:3000`.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### 2. Mobile App (Expo)
 
-### Android
+```bash
+# Navigate to mobile app folder
+cd StudyTracker
 
-```sh
-# Using npm
-npm run android
+# Install dependencies
+npm install
 
-# OR using Yarn
-yarn android
+# Start Expo development server
+npx expo start
 ```
 
-### iOS
+### 3. Testing on Physical Device
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+1. Download **Expo Go** from the Google Play Store (Android) or App Store (iOS).
+2. Connect your phone to the same WiFi network as your PC.
+3. Open the Camera app (iOS) or Expo Go app (Android) and scan the QR code that appears in your terminal after running `npx expo start`.
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+> **Note:** The app is configured to connect to your local backend. You MUST update the `API_BASE_URL` in `src/api/client.ts` with your PC's local IP address (e.g., `192.168.1.5`) instead of `localhost` or `10.0.2.2`.
 
-```sh
-bundle install
+## Demo Credentials
+
+After running the seed script:
+
+| Role       | Username    | Password    |
+|------------|-------------|-------------|
+| Student    | student1    | password123 |
+| Supervisor | supervisor1 | password123 |
+
+## Project Structure
+
+```
+study-tracker-backend/
+├── prisma/
+│   ├── schema.prisma
+│   ├── migrations/
+│   └── seed.ts
+├── src/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── routes/
+│   ├── services/
+│   └── app.ts
+└── tests/
+
+StudyTracker/           ← React Native App
+├── src/
+│   ├── api/            ← Axios client & endpoints
+│   ├── components/     ← Reusable UI components
+│   ├── contexts/       ← AuthContext (user session)
+│   ├── navigation/     ← Stack & Tab navigators
+│   ├── screens/
+│   │   ├── auth/       ← Login, Register
+│   │   ├── student/    ← Home, AddEntry, History, Leaderboard
+│   │   └── supervisor/ ← Dashboard, Students, Leaderboard
+│   ├── types/          ← TypeScript interfaces
+│   └── utils/          ← Theme (colors, spacing)
+└── App.tsx
 ```
 
-Then, and every time you update your native dependencies, run:
+## API Endpoints
 
-```sh
-bundle exec pod install
-```
+See `docs/API.md` for complete API documentation.
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+## Future Enhancements
 
-```sh
-# Using npm
-npm run ios
+- Course results tracking
+- KPI dashboards for instructors
+- Push notifications for daily reminders
+- Data visualization charts
+- Export reports (PDF/Excel)
+- Instructor role
 
-# OR using Yarn
-yarn ios
-```
+## License
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+MIT
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Author
 
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Ahmed ElKashif
+ITP Front-End & Mobile Dev Track
+ITI 2026
