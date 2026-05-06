@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LIVE_BACKEND_URL =
-  'https://itierstudytracker-b04qfnm2a-ahmed-elkashifs-projects.vercel.app/api/v1';
+  'https://itierstudytracker-bzeim4938-ahmed-elkashifs-projects.vercel.app/api/v1';
 const API_BASE_URL = __DEV__
   ? LIVE_BACKEND_URL // ← Use 10.0.2.2 for Android Emulator
   : LIVE_BACKEND_URL;

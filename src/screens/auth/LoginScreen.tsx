@@ -50,7 +50,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as any,
     defaultValues: {
       username: '',
       password: '',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,9 @@ import {
   ScrollView,
   Alert,
   TouchableOpacity,
+  Modal,
+  FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
@@ -18,8 +21,12 @@ import { Button } from '../../components/Button';
 import { colors, spacing } from '../../utils/theme';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/types';
+import { trackAPI, Track } from '../../api/endpoints';
 
-type RegisterScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Register'>;
+type RegisterScreenNavigationProp = StackNavigationProp<
+  AuthStackParamList,
+  'Register'
+>;
 
 interface Props {
   navigation: RegisterScreenNavigationProp;
@@ -31,6 +38,7 @@ interface RegisterFormData {
   password: string;
   confirmPassword: string;
   fullName: string;
+  trackId: number;
 }
 
 const schema = yup.object().shape({
@@ -38,7 +46,10 @@ const schema = yup.object().shape({
     .string()
     .required('Username is required')
     .min(3, 'Username must be at least 3 characters')
-    .matches(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+    .matches(
+      /^[a-zA-Z0-9_]+$/,
+      'Username can only contain letters, numbers, and underscores',
+    ),
   email: yup
     .string()
     .required('Email is required')
@@ -55,24 +66,43 @@ const schema = yup.object().shape({
     .string()
     .required('Please confirm your password')
     .oneOf([yup.ref('password')], 'Passwords must match'),
+  trackId: yup.number().min(1, 'Please select a track').required('Please select a track'),
 });
 
 export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [isLoadingTracks, setIsLoadingTracks] = useState(true);
+  const [isTrackModalVisible, setIsTrackModalVisible] = useState(false);
+
+  useEffect(() => {
+    const fetchTracks = async () => {
+      try {
+        const response = await trackAPI.getTracks();
+        setTracks(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch tracks:', error);
+      } finally {
+        setIsLoadingTracks(false);
+      }
+    };
+    fetchTracks();
+  }, []);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterFormData>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as any,
     defaultValues: {
       username: '',
       email: '',
       password: '',
       confirmPassword: '',
       fullName: '',
+      trackId: 0,
     },
   });
 
@@ -84,8 +114,8 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         email: data.email,
         password: data.password,
         fullName: data.fullName,
-        role: 'STUDENT', // Default to student
-        trackId: 1, // Default track (in production, user would select)
+        role: 'STUDENT',
+        trackId: data.trackId,
       });
       // Auto-navigates after successful registration
     } catch (error: any) {
@@ -199,6 +229,69 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             )}
           />
 
+          <Controller
+            control={control}
+            name="trackId"
+            render={({ field: { onChange, value } }) => {
+              const selectedTrack = tracks.find((t) => t.id === value);
+              return (
+                <View style={styles.trackContainer}>
+                  <Text style={styles.trackLabel}>Select Track:</Text>
+                  <TouchableOpacity
+                    style={styles.trackSelector}
+                    onPress={() => setIsTrackModalVisible(true)}
+                    disabled={isLoading || isLoadingTracks}
+                  >
+                    {isLoadingTracks ? (
+                      <ActivityIndicator size="small" color={colors.primary} />
+                    ) : (
+                      <Text style={[styles.trackSelectorText, !selectedTrack && styles.trackSelectorPlaceholder]}>
+                        {selectedTrack ? selectedTrack.name : 'Choose a track...'}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                  {errors.trackId?.message && <Text style={{ color: colors.error, fontSize: 12, marginTop: 4, marginLeft: 4 }}>{errors.trackId.message}</Text>}
+
+                  <Modal
+                    visible={isTrackModalVisible}
+                    transparent={true}
+                    animationType="slide"
+                    onRequestClose={() => setIsTrackModalVisible(false)}
+                  >
+                    <View style={styles.modalOverlay}>
+                      <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Select Track</Text>
+                        <FlatList
+                          data={tracks}
+                          keyExtractor={(item) => item.id.toString()}
+                          renderItem={({ item }) => (
+                            <TouchableOpacity
+                              style={styles.modalItem}
+                              onPress={() => {
+                                onChange(item.id);
+                                setIsTrackModalVisible(false);
+                              }}
+                            >
+                              <Text style={[styles.modalItemText, value === item.id && styles.modalItemTextActive]}>
+                                {item.name}
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        />
+                        <TouchableOpacity
+                          style={styles.modalCloseButton}
+                          onPress={() => setIsTrackModalVisible(false)}
+                        >
+                          <Text style={styles.modalCloseButtonText}>Cancel</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </Modal>
+                </View>
+              );
+            }}
+          />
+
           <Button
             title="Register"
             onPress={handleSubmit(onSubmit)}
@@ -261,5 +354,74 @@ const styles = StyleSheet.create({
   loginTextBold: {
     color: colors.primary,
     fontWeight: '600',
+  },
+  trackContainer: {
+    marginBottom: spacing.md,
+  },
+  trackLabel: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+    marginLeft: spacing.xs,
+  },
+  trackSelector: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    padding: spacing.md,
+    backgroundColor: colors.background,
+    minHeight: 50,
+    justifyContent: 'center',
+  },
+  trackSelectorText: {
+    fontSize: 16,
+    color: colors.text,
+  },
+  trackSelectorPlaceholder: {
+    color: colors.textSecondary,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: spacing.lg,
+    maxHeight: '70%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: spacing.md,
+    textAlign: 'center',
+  },
+  modalItem: {
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalItemText: {
+    fontSize: 16,
+    color: colors.text,
+  },
+  modalItemTextActive: {
+    color: colors.primary,
+    fontWeight: 'bold',
+  },
+  modalCloseButton: {
+    marginTop: spacing.md,
+    padding: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  modalCloseButtonText: {
+    color: colors.text,
+    fontWeight: '600',
+    fontSize: 16,
   },
 });

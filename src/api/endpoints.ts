@@ -14,6 +14,12 @@ export interface RegisterRequest {
   trackId: number;
 }
 
+export interface Track {
+  id: number;
+  name: string;
+  supervisorId: number;
+}
+
 export interface User {
   id: number;
   username: string;
@@ -30,6 +36,11 @@ export interface LoginResponse {
   };
 }
 
+export interface TracksResponse {
+  success: boolean;
+  data: Track[];
+}
+
 // Auth endpoints
 export const authAPI = {
   register: (data: RegisterRequest) => apiClient.post('/auth/register', data),
@@ -38,11 +49,16 @@ export const authAPI = {
     apiClient.post<LoginResponse>('/auth/login', data),
 };
 
+// Track endpoints
+export const trackAPI = {
+  getTracks: () => apiClient.get<TracksResponse>('/tracks'),
+};
+
 // Entry endpoints
 export const entryAPI = {
   create: (data: any) => apiClient.post('/entries', data),
 
-  getMyEntries: (params?: any) => apiClient.get('/entries/me', {params}),
+  getMyEntries: (params?: any) => apiClient.get('/entries/me', { params }),
 
   update: (entryId: number, data: any) =>
     apiClient.put(`/entries/${entryId}`, data),
@@ -53,10 +69,10 @@ export const entryAPI = {
 // Leaderboard endpoints
 export const leaderboardAPI = {
   daily: (date: string, trackId: number) =>
-    apiClient.get('/leaderboard/daily', {params: {date, trackId}}),
+    apiClient.get('/leaderboard/daily', { params: { date, trackId } }),
 
   weekly: (weekStart: string, trackId: number) =>
-    apiClient.get('/leaderboard/weekly', {params: {weekStart, trackId}}),
+    apiClient.get('/leaderboard/weekly', { params: { weekStart, trackId } }),
 };
 
 // Quote endpoint

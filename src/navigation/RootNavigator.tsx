@@ -25,7 +25,7 @@ export const RootNavigator = () => {
     <>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator screenOptions={{ headerShown: false }} id={undefined}>
           {!isAuthenticated ? (
             <Stack.Screen name="Auth" component={AuthStack} />
           ) : user?.role === 'STUDENT' ? (
