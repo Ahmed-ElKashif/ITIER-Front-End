@@ -11,6 +11,7 @@ const Tab = createBottomTabNavigator<SupervisorTabParamList>();
 export const SupervisorTabs = () => {
   return (
     <Tab.Navigator
+      id={undefined}
       screenOptions={{
         tabBarActiveTintColor: '#4CAF50',
         tabBarInactiveTintColor: '#757575',
