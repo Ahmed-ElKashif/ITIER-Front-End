@@ -1,9 +1,10 @@
 /**
- * useTracks Hook
- * Single Responsibility: Fetch and cache active tracks for registration.
+ * useTracks Hook — Task 15.5 update
+ * Fetch and cache active tracks for registration with retry logic.
  */
 import { useState, useEffect, useCallback } from 'react';
 import { TrackAPI } from '../api/endpoints/index';
+import { retryRequest } from '../utils/retryRequest';
 import type { TrackWithStats } from '../api/types';
 
 interface UseTracksReturn {
@@ -22,11 +23,15 @@ export const useTracks = (): UseTracksReturn => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await TrackAPI.getActiveTracks();
+
+      // Wrap in retry for Vercel cold-start recovery
+      const response = await retryRequest(() => TrackAPI.getActiveTracks());
       setTracks(response.data);
     } catch (err: any) {
       const msg =
-        err.response?.data?.error || 'Failed to load tracks. Please try again.';
+        err.response?.data?.error ||
+        err.message ||
+        'Failed to load tracks. Please try again.';
       setError(msg);
       console.error('useTracks fetch error:', err);
     } finally {
