@@ -21,7 +21,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   return (
     <View style={[styles.card, { borderLeftColor: color }]}>
       <View style={styles.iconContainer}>
-        <Icon name={icon} size={32} color={color} />
+        <Icon name={icon as any} size={32} color={color} />
       </View>
       <View style={styles.content}>
         <Text style={styles.title}>{title}</Text>

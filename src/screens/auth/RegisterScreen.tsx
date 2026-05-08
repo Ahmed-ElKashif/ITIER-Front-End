@@ -1,3 +1,12 @@
+/**
+ * RegisterScreen — Phase 2
+ *
+ * Changes from Phase 1:
+ * - trackId is now selected via TrackSelector (no longer hardcoded to 1)
+ * - role is no longer sent (always STUDENT for self-registration)
+ * - After successful register → navigate to PendingApproval (NOT auto-login)
+ * - Track capacity 409 errors shown clearly
+ */
 import React, { useState } from 'react';
 import {
   View,
@@ -15,11 +24,16 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuth } from '../../contexts/AuthContext';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
+import { TrackSelector } from '../../components/domain/TrackSelector';
 import { colors, spacing } from '../../utils/theme';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/types';
+import type { TrackWithStats } from '../../api/types';
 
-type RegisterScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Register'>;
+type RegisterScreenNavigationProp = StackNavigationProp<
+  AuthStackParamList,
+  'Register'
+>;
 
 interface Props {
   navigation: RegisterScreenNavigationProp;
@@ -37,8 +51,11 @@ const schema = yup.object().shape({
   username: yup
     .string()
     .required('Username is required')
-    .min(3, 'Username must be at least 3 characters')
-    .matches(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+    .min(3, 'At least 3 characters')
+    .matches(
+      /^[a-zA-Z0-9_]+$/,
+      'Letters, numbers and underscores only',
+    ),
   email: yup
     .string()
     .required('Email is required')
@@ -46,11 +63,11 @@ const schema = yup.object().shape({
   fullName: yup
     .string()
     .required('Full name is required')
-    .min(2, 'Full name must be at least 2 characters'),
+    .min(2, 'At least 2 characters'),
   password: yup
     .string()
     .required('Password is required')
-    .min(6, 'Password must be at least 6 characters'),
+    .min(6, 'At least 6 characters'),
   confirmPassword: yup
     .string()
     .required('Please confirm your password')
@@ -60,13 +77,16 @@ const schema = yup.object().shape({
 export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedTrack, setSelectedTrack] = useState<TrackWithStats | null>(
+    null,
+  );
 
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterFormData>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as any,
     defaultValues: {
       username: '',
       email: '',
@@ -77,19 +97,29 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   });
 
   const onSubmit = async (data: RegisterFormData) => {
+    // Validate track selection before submitting
+    if (!selectedTrack) {
+      Alert.alert('Track Required', 'Please select a track to continue.');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await register({
+      const result = await register({
         username: data.username,
         email: data.email,
         password: data.password,
         fullName: data.fullName,
-        role: 'STUDENT', // Default to student
-        trackId: 1, // Default track (in production, user would select)
+        trackId: selectedTrack.id,
+        // NOTE: role is NOT sent — backend defaults to STUDENT
       });
-      // Auto-navigates after successful registration
+
+      // Phase 2: navigate to pending screen — do NOT auto-login
+      navigation.replace('PendingApproval', { username: result.username });
     } catch (error: any) {
-      Alert.alert('Registration Failed', error.message);
+      // Handle track full (409) and other errors
+      const msg = error.message || 'Registration failed. Please try again.';
+      Alert.alert('Registration Failed', msg);
     } finally {
       setIsLoading(false);
     }
@@ -104,12 +134,16 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Join the ITI community</Text>
         </View>
 
         <View style={styles.form}>
+          {/* Personal Info */}
+          <Text style={styles.sectionLabel}>Personal Information</Text>
+
           <Controller
             control={control}
             name="fullName"
@@ -150,7 +184,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Email"
-                placeholder="Enter your email"
+                placeholder="Enter your ITI email"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -169,7 +203,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Password"
-                placeholder="Create a password"
+                placeholder="Create a password (min 6 chars)"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -187,7 +221,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Confirm Password"
-                placeholder="Confirm your password"
+                placeholder="Repeat your password"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -199,8 +233,22 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             )}
           />
 
+          {/* Phase 2: Track selection */}
+          <View style={styles.sectionDivider} />
+          <TrackSelector
+            selectedTrackId={selectedTrack?.id ?? null}
+            onSelect={setSelectedTrack}
+          />
+
+          {/* Track error hint */}
+          {!selectedTrack && (
+            <Text style={styles.trackHint}>
+              ⚠️ You must select a track to register
+            </Text>
+          )}
+
           <Button
-            title="Register"
+            title={isLoading ? 'Submitting…' : 'Register'}
             onPress={handleSubmit(onSubmit)}
             loading={isLoading}
             style={styles.registerButton}
@@ -247,8 +295,28 @@ const styles = StyleSheet.create({
   form: {
     marginBottom: spacing.xl,
   },
+  sectionLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  sectionDivider: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginVertical: spacing.lg,
+  },
+  trackHint: {
+    fontSize: 12,
+    color: colors.error,
+    marginTop: spacing.xs,
+    marginBottom: spacing.sm,
+  },
   registerButton: {
-    marginTop: spacing.md,
+    marginTop: spacing.lg,
   },
   loginLink: {
     marginTop: spacing.lg,

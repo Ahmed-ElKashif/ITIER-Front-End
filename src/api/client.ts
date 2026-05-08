@@ -43,7 +43,10 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   response => response,
   async error => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    // Only clear auth state on 401 (expired/invalid token).
+    // 403 is used by Phase 2 backend to signal PENDING_APPROVAL / SUSPENDED /
+    // ARCHIVED status — these must reach the screen, NOT trigger a logout.
+    if (error.response?.status === 401) {
       await AsyncStorage.removeItem('authToken');
       await AsyncStorage.removeItem('user');
       if (onUnauthorizedCallback) {

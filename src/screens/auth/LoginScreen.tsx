@@ -1,3 +1,11 @@
+/**
+ * LoginScreen — Phase 2
+ *
+ * Changes:
+ * - On PENDING_APPROVAL errorCode → navigate to PendingApproval screen
+ * - On SUSPENDED errorCode → show specific alert (no screen nav)
+ * - On ARCHIVED → show rejection message
+ */
 import React, { useState } from 'react';
 import {
   View,
@@ -13,13 +21,17 @@ import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuth } from '../../contexts/AuthContext';
+import type { AuthError } from '../../contexts/AuthContext';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { colors, spacing } from '../../utils/theme';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/types';
 
-type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
+type LoginScreenNavigationProp = StackNavigationProp<
+  AuthStackParamList,
+  'Login'
+>;
 
 interface Props {
   navigation: LoginScreenNavigationProp;
@@ -34,11 +46,11 @@ const schema = yup.object().shape({
   username: yup
     .string()
     .required('Username is required')
-    .min(3, 'Username must be at least 3 characters'),
+    .min(3, 'At least 3 characters'),
   password: yup
     .string()
     .required('Password is required')
-    .min(6, 'Password must be at least 6 characters'),
+    .min(6, 'At least 6 characters'),
 });
 
 export const LoginScreen: React.FC<Props> = ({ navigation }) => {
@@ -48,22 +60,45 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const {
     control,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<LoginFormData>({
-    resolver: yupResolver(schema),
-    defaultValues: {
-      username: '',
-      password: '',
-    },
+    resolver: yupResolver(schema) as any,
+    defaultValues: { username: '', password: '' },
   });
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
       await login(data.username, data.password);
-      // Navigation happens automatically via RootNavigator
+      // On success: RootNavigator auto-switches to the correct tab stack
     } catch (error: any) {
-      Alert.alert('Login Failed', error.message);
+      const authErr = error as AuthError;
+
+      // Phase 2: route on errorCode — don't just show a generic alert
+      if (authErr.errorCode === 'PENDING_APPROVAL') {
+        navigation.navigate('PendingApproval', { username: data.username });
+        return;
+      }
+
+      if (authErr.errorCode === 'SUSPENDED') {
+        Alert.alert(
+          '🚫 Account Suspended',
+          'Your account has been suspended. Please contact your supervisor for details.',
+        );
+        return;
+      }
+
+      if (authErr.errorCode === 'ARCHIVED') {
+        Alert.alert(
+          '❌ Registration Not Approved',
+          'Your registration was not approved. Please contact your supervisor.',
+        );
+        return;
+      }
+
+      // Generic credential error (401)
+      Alert.alert('Login Failed', authErr.message || 'Invalid credentials');
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +156,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
           />
 
           <Button
-            title="Login"
+            title={isLoading ? 'Logging in…' : 'Login'}
             onPress={handleSubmit(onSubmit)}
             loading={isLoading}
             style={styles.loginButton}
@@ -138,10 +173,14 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
+        {/* Phase 2: updated demo credentials */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Demo Credentials:</Text>
+          <Text style={styles.footerTitle}>Demo Credentials</Text>
+          <Text style={styles.footerText}>Admin: ahmed_admin / admin123</Text>
+          <Text style={styles.footerText}>
+            Supervisor: amira_supervisor / supervisor123
+          </Text>
           <Text style={styles.footerText}>Student: student1 / password123</Text>
-          <Text style={styles.footerText}>Supervisor: supervisor1 / password123</Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -149,10 +188,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
@@ -173,24 +209,11 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
   },
-  form: {
-    marginBottom: spacing.xl,
-  },
-  loginButton: {
-    marginTop: spacing.md,
-  },
-  registerLink: {
-    marginTop: spacing.lg,
-    alignItems: 'center',
-  },
-  registerText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  registerTextBold: {
-    color: colors.primary,
-    fontWeight: '600',
-  },
+  form: { marginBottom: spacing.xl },
+  loginButton: { marginTop: spacing.md },
+  registerLink: { marginTop: spacing.lg, alignItems: 'center' },
+  registerText: { fontSize: 14, color: colors.textSecondary },
+  registerTextBold: { color: colors.primary, fontWeight: '600' },
   footer: {
     alignItems: 'center',
     marginTop: spacing.xl,
@@ -198,9 +221,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: 8,
   },
+  footerTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+  },
   footerText: {
     fontSize: 12,
     color: colors.textSecondary,
-    marginBottom: spacing.xs,
+    marginBottom: 2,
   },
 });

@@ -3,6 +3,8 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
+  /** Shown after registration or when login returns PENDING_APPROVAL */
+  PendingApproval: { username: string };
 };
 
 export type StudentTabParamList = {
@@ -15,6 +17,7 @@ export type StudentTabParamList = {
 export type SupervisorTabParamList = {
   Dashboard: undefined;
   Students: undefined;
+  PendingStudents: undefined;
   Leaderboard: undefined;
 };
 

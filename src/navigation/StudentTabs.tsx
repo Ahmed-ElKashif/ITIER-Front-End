@@ -12,6 +12,7 @@ const Tab = createBottomTabNavigator<StudentTabParamList>();
 export const StudentTabs = () => {
   return (
     <Tab.Navigator
+      id="StudentTabs"
       screenOptions={{
         tabBarActiveTintColor: '#2196F3',
         tabBarInactiveTintColor: '#757575',

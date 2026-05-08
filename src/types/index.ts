@@ -1,11 +1,19 @@
-export type Role = 'STUDENT' | 'SUPERVISOR';
+export type Role = 'ADMIN' | 'SUPERVISOR' | 'STUDENT';
+
+export type StudentStatus =
+  | 'PENDING_APPROVAL'
+  | 'ACTIVE'
+  | 'SUSPENDED'
+  | 'ARCHIVED';
 
 export interface User {
   id: number;
   username: string;
   fullName: string;
   role: Role;
-  trackId: number;
+  status: StudentStatus;
+  trackId: number | null;
+  track?: { id: number; name: string } | null;
 }
 
 export interface StudyEntry {

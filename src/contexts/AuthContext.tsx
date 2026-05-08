@@ -4,14 +4,28 @@ import { authAPI } from '../api/endpoints';
 import { setOnUnauthorized } from '../api/client';
 import { User } from '../types';
 
+// ── Error type for Phase 2 login gates ────────────────────────────────────────
+
+export interface AuthError {
+  message: string;
+  /** Phase 2: PENDING_APPROVAL | SUSPENDED | ARCHIVED — drives screen routing */
+  errorCode?: 'PENDING_APPROVAL' | 'SUSPENDED' | 'ARCHIVED';
+  status?: string;
+}
+
+// ── Context interface ─────────────────────────────────────────────────────────
+
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (data: any) => Promise<void>;
+  /** Phase 2: register no longer auto-logs in — students land on PendingApproval */
+  register: (data: any) => Promise<{ username: string; status: string }>;
 }
+
+// ── Context ───────────────────────────────────────────────────────────────────
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
@@ -22,6 +36,8 @@ export const useAuth = () => {
   }
   return context;
 };
+
+// ── Provider ──────────────────────────────────────────────────────────────────
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -51,26 +67,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  /**
+   * Login — throws AuthError if credentials are invalid OR if the account
+   * is PENDING_APPROVAL / SUSPENDED / ARCHIVED.
+   * The errorCode field tells LoginScreen which screen to navigate to.
+   */
   const login = async (username: string, password: string) => {
     try {
       const response = await authAPI.login({ username, password });
-      const { token, user } = response.data.data;
+      const { token, user: loggedInUser } = response.data.data;
 
       await AsyncStorage.setItem('authToken', token);
-      await AsyncStorage.setItem('user', JSON.stringify(user));
+      await AsyncStorage.setItem('user', JSON.stringify(loggedInUser));
 
-      setUser(user);
+      setUser(loggedInUser);
     } catch (error: any) {
       console.error('Login error:', error);
-      throw new Error(error.response?.data?.error || 'Login failed');
+      // Phase 2: 403 carries errorCode for PENDING_APPROVAL / SUSPENDED / ARCHIVED
+      const authError: AuthError = {
+        message: error.response?.data?.error || 'Login failed',
+        errorCode: error.response?.data?.errorCode,
+        status: error.response?.data?.status,
+      };
+      throw authError;
     }
   };
 
-  const register = async (data: any) => {
+  /**
+   * Phase 2 Register — does NOT auto-login.
+   * Students start as PENDING_APPROVAL and must be approved before logging in.
+   * Returns { username, status } so the screen can navigate to PendingApproval.
+   */
+  const register = async (data: any): Promise<{ username: string; status: string }> => {
     try {
-      await authAPI.register(data);
-      // Auto-login after registration
-      await login(data.username, data.password);
+      const response = await authAPI.register(data);
+      const result = response.data.data;
+      // Return registration result — caller decides where to navigate
+      return { username: result.username, status: result.status };
     } catch (error: any) {
       console.error('Registration error:', error);
       throw new Error(error.response?.data?.error || 'Registration failed');
