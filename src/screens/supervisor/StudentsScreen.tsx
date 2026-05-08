@@ -9,11 +9,11 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Header } from '../../components/Header';
 import { StudentCard } from '../../components/StudentCard';
-import { supervisorAPI } from '../../api/endpoints';
+import apiClient from '../../api/client';
 import { colors, spacing } from '../../utils/theme';
-import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 
 export const StudentsScreen = () => {
   const [students, setStudents] = useState<any[]>([]);
@@ -21,18 +21,23 @@ export const StudentsScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [noTrack, setNoTrack] = useState(false);
 
   const fetchStudents = useCallback(async (isRefresh = false) => {
     try {
       if (isRefresh) setIsRefreshing(true);
       else setIsLoading(true);
+      setNoTrack(false);
 
-      const response = await supervisorAPI.trackOverview();
-      const studentList = response.data.data.students;
+      const response = await apiClient.get('/supervisor/track-overview');
+      const studentList = response.data.data.students ?? [];
       setStudents(studentList);
       setFilteredStudents(studentList);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fetch students error:', error);
+      if (error.response?.status === 403) {
+        setNoTrack(true);
+      }
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -44,12 +49,15 @@ export const StudentsScreen = () => {
   }, [fetchStudents]);
 
   useEffect(() => {
-    if (searchQuery) {
-      const filtered = students.filter((student) =>
-        student.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        student.username.toLowerCase().includes(searchQuery.toLowerCase())
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      setFilteredStudents(
+        students.filter(
+          s =>
+            s.fullName.toLowerCase().includes(q) ||
+            s.username.toLowerCase().includes(q),
+        ),
       );
-      setFilteredStudents(filtered);
     } else {
       setFilteredStudents(students);
     }
@@ -57,41 +65,47 @@ export const StudentsScreen = () => {
 
   const handleStudentPress = useCallback(async (student: any) => {
     try {
-      const response = await supervisorAPI.studentDetails(student.userId);
+      const response = await apiClient.get(`/supervisor/student/${student.userId}`);
       const details = response.data.data;
 
-      const message = `
-Student: ${details.student.fullName}
-Email: ${details.student.email}
-Total Hours: ${details.analytics.totalHours}
-Total Entries: ${details.analytics.totalEntries}
+      const message = [
+        `Email: ${details.student.email}`,
+        `Total Hours: ${details.analytics.totalHours}`,
+        `Total Entries: ${details.analytics.totalEntries}`,
+        '',
+        'Subject Breakdown:',
+        ...details.analytics.subjectBreakdown.map(
+          (s: any) => `  ${s.subject}: ${s.hours}h`,
+        ),
+      ].join('\n');
 
-Subject Breakdown:
-${details.analytics.subjectBreakdown.map((s: any) => `${s.subject}: ${s.hours}h`).join('\n')}
-      `;
-
-      Alert.alert('Student Details', message.trim());
-    } catch (error) {
+      Alert.alert(details.student.fullName, message);
+    } catch {
       Alert.alert('Error', 'Failed to fetch student details');
     }
   }, []);
-
-  const renderStudent = ({ item }: { item: any }) => (
-    <StudentCard student={item} onPress={() => handleStudentPress(item)} />
-  );
-
-  const renderEmpty = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>No students found</Text>
-    </View>
-  );
 
   if (isLoading) {
     return (
       <View style={styles.container}>
         <Header title="Students" showLogout />
-        <View style={styles.loadingContainer}>
+        <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.secondary} />
+        </View>
+      </View>
+    );
+  }
+
+  if (noTrack) {
+    return (
+      <View style={styles.container}>
+        <Header title="Students" showLogout />
+        <View style={styles.center}>
+          <Ionicons name="people-outline" size={56} color={colors.textSecondary} />
+          <Text style={styles.emptyTitle}>No Track Assigned</Text>
+          <Text style={styles.emptySubtitle}>
+            Students will appear here once your track is set up.
+          </Text>
         </View>
       </View>
     );
@@ -103,10 +117,10 @@ ${details.analytics.subjectBreakdown.map((s: any) => `${s.subject}: ${s.hours}h`
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <Icon name="magnify" size={20} color={colors.textSecondary} />
+        <Ionicons name="search-outline" size={20} color={colors.textSecondary} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search students..."
+          placeholder="Search by name or username…"
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholderTextColor={colors.textSecondary}
@@ -115,15 +129,22 @@ ${details.analytics.subjectBreakdown.map((s: any) => `${s.subject}: ${s.hours}h`
 
       <FlatList
         data={filteredStudents}
-        renderItem={renderStudent}
-        keyExtractor={(item) => item.userId.toString()}
+        renderItem={({ item }) => (
+          <StudentCard student={item} onPress={() => handleStudentPress(item)} />
+        )}
+        keyExtractor={item => item.userId.toString()}
         contentContainerStyle={styles.listContent}
-        ListEmptyComponent={renderEmpty}
+        ListEmptyComponent={
+          <View style={styles.center}>
+            <Text style={styles.emptyTitle}>No students found</Text>
+          </View>
+        }
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={() => fetchStudents(true)}
             colors={[colors.secondary]}
+            tintColor={colors.secondary}
           />
         }
       />
@@ -132,41 +153,45 @@ ${details.analytics.subjectBreakdown.map((s: any) => `${s.subject}: ${s.hours}h`
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  loadingContainer: {
+  container: { flex: 1, backgroundColor: colors.background },
+  center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: spacing.sm,
+    padding: spacing.xl,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    borderRadius: 8,
+    borderRadius: 10,
     paddingHorizontal: spacing.md,
     margin: spacing.md,
     marginBottom: 0,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   searchInput: {
     flex: 1,
     paddingVertical: spacing.md,
     paddingLeft: spacing.sm,
-    fontSize: 16,
+    fontSize: 15,
     color: colors.text,
   },
   listContent: {
     padding: spacing.md,
-  },
-  emptyContainer: {
-    padding: spacing.xl,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.textSecondary,
   },
 });

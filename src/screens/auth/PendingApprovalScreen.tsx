@@ -17,6 +17,7 @@ import {
   ScrollView,
   StatusBar,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -36,12 +37,13 @@ export const PendingApprovalScreen: React.FC<Props> = ({
   route,
 }) => {
   const { username } = route.params;
+  const insets = useSafeAreaInsets();
 
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[styles.container, { paddingTop: insets.top + spacing.xl }]}
         keyboardShouldPersistTaps="handled"
       >
         {/* Icon */}
@@ -134,7 +136,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: colors.background,
     padding: spacing.lg,
-    paddingTop: spacing.xl * 2,
     alignItems: 'center',
   },
   iconContainer: {
