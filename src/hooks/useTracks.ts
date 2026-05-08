@@ -28,11 +28,15 @@ export const useTracks = (): UseTracksReturn => {
       const response = await retryRequest(() => TrackAPI.getActiveTracks());
       setTracks(response.data);
     } catch (err: any) {
+      // Vercel errors come as { error: { code, message } } — extract safely
+      const rawErr = err.response?.data?.error;
       const msg =
-        err.response?.data?.error ||
-        err.message ||
-        'Failed to load tracks. Please try again.';
-      setError(msg);
+        typeof rawErr === 'string'
+          ? rawErr
+          : typeof rawErr === 'object' && rawErr?.message
+          ? rawErr.message
+          : err.message || 'Failed to load tracks. Please try again.';
+      setError(String(msg));
       console.error('useTracks fetch error:', err);
     } finally {
       setIsLoading(false);
