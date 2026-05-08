@@ -16,6 +16,7 @@ export const StudentTabs = () => {
       screenOptions={{
         tabBarActiveTintColor: '#2196F3',
         tabBarInactiveTintColor: '#757575',
+        headerShown: false,
       }}
     >
       <Tab.Screen

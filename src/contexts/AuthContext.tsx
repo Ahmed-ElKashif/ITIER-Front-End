@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthAPI as authAPI } from '../api/endpoints/index';
+import { authAPI } from '../api/endpoints';
 import { setOnUnauthorized } from '../api/client';
 import { User } from '../types';
 
@@ -74,8 +74,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
    */
   const login = async (username: string, password: string) => {
     try {
-      const response = await authAPI.login({ username, password });
-      const { token, user: loggedInUser } = response.data;
+      const result = await authAPI.login({ username, password });
+      const { token, user: loggedInUser } = result.data.data;
 
       await AsyncStorage.setItem('authToken', token);
       await AsyncStorage.setItem('user', JSON.stringify(loggedInUser));
@@ -100,10 +100,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
    */
   const register = async (data: any): Promise<{ username: string; status: string }> => {
     try {
-      const response = await authAPI.register(data);
-      const result = response.data;
-      // Return registration result — caller decides where to navigate
-      return { username: result.username, status: result.status };
+      const result = await authAPI.register(data);
+      const reg = result.data.data;
+      return { username: reg.username, status: reg.status };
     } catch (error: any) {
       console.error('Registration error:', error);
       throw new Error(error.response?.data?.error || 'Registration failed');
