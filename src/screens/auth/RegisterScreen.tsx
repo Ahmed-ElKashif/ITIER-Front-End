@@ -17,6 +17,9 @@ import {
   ScrollView,
   Alert,
   TouchableOpacity,
+  Modal,
+  FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
@@ -45,6 +48,7 @@ interface RegisterFormData {
   password: string;
   confirmPassword: string;
   fullName: string;
+  trackId: number;
 }
 
 const schema = yup.object().shape({
@@ -72,6 +76,7 @@ const schema = yup.object().shape({
     .string()
     .required('Please confirm your password')
     .oneOf([yup.ref('password')], 'Passwords must match'),
+  trackId: yup.number().min(1, 'Please select a track').required('Please select a track'),
 });
 
 export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
@@ -93,6 +98,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
       password: '',
       confirmPassword: '',
       fullName: '',
+      trackId: 0,
     },
   });
 
@@ -329,5 +335,74 @@ const styles = StyleSheet.create({
   loginTextBold: {
     color: colors.primary,
     fontWeight: '600',
+  },
+  trackContainer: {
+    marginBottom: spacing.md,
+  },
+  trackLabel: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+    marginLeft: spacing.xs,
+  },
+  trackSelector: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    padding: spacing.md,
+    backgroundColor: colors.background,
+    minHeight: 50,
+    justifyContent: 'center',
+  },
+  trackSelectorText: {
+    fontSize: 16,
+    color: colors.text,
+  },
+  trackSelectorPlaceholder: {
+    color: colors.textSecondary,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: spacing.lg,
+    maxHeight: '70%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: spacing.md,
+    textAlign: 'center',
+  },
+  modalItem: {
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalItemText: {
+    fontSize: 16,
+    color: colors.text,
+  },
+  modalItemTextActive: {
+    color: colors.primary,
+    fontWeight: 'bold',
+  },
+  modalCloseButton: {
+    marginTop: spacing.md,
+    padding: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  modalCloseButtonText: {
+    color: colors.text,
+    fontWeight: '600',
+    fontSize: 16,
   },
 });

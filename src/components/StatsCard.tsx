@@ -7,7 +7,7 @@ interface StatsCardProps {
   title: string;
   value: string;
   subtitle?: string;
-  icon: string;
+  icon: any;
   color?: string;
 }
 

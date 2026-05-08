@@ -16,6 +16,12 @@ export interface RegisterRequest {
   trackId: number; // Required — students must choose a track
 }
 
+export interface Track {
+  id: number;
+  name: string;
+  supervisorId: number;
+}
+
 export interface User {
   id: number;
   username: string;
