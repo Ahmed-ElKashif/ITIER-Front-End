@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { SupervisorTabParamList } from './types';
 import { DashboardScreen } from '../screens/supervisor/DashboardScreen';
+import { KPIDashboardScreen } from '../screens/supervisor/KPIDashboardScreen';
 import { StudentsScreen } from '../screens/supervisor/StudentsScreen';
 import { PendingStudentsScreen } from '../screens/supervisor/PendingStudentsScreen';
 import { LeaderboardScreen } from '../screens/supervisor/LeaderboardScreen';
@@ -26,6 +27,17 @@ export const SupervisorTabs = () => {
           tabBarLabel: 'Dashboard',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="grid-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      {/* Phase 2: KPI analytics */}
+      <Tab.Screen
+        name="KPIDashboard"
+        component={KPIDashboardScreen}
+        options={{
+          tabBarLabel: 'KPIs',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="analytics-outline" size={size} color={color} />
           ),
         }}
       />

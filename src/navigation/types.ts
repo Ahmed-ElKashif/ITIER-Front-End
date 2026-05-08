@@ -16,13 +16,21 @@ export type StudentTabParamList = {
 
 export type SupervisorTabParamList = {
   Dashboard: undefined;
+  KPIDashboard: undefined;
   Students: undefined;
   PendingStudents: undefined;
   Leaderboard: undefined;
+};
+
+export type AdminTabParamList = {
+  AdminDashboard: undefined;
+  ManageSupervisors: undefined;
 };
 
 export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
   StudentTabs: NavigatorScreenParams<StudentTabParamList>;
   SupervisorTabs: NavigatorScreenParams<SupervisorTabParamList>;
+  AdminTabs: NavigatorScreenParams<AdminTabParamList>;
 };
+

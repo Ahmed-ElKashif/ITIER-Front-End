@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authAPI } from '../api/endpoints';
+import { AuthAPI as authAPI } from '../api/endpoints/index';
 import { setOnUnauthorized } from '../api/client';
 import { User } from '../types';
 
@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = async (username: string, password: string) => {
     try {
       const response = await authAPI.login({ username, password });
-      const { token, user: loggedInUser } = response.data.data;
+      const { token, user: loggedInUser } = response.data;
 
       await AsyncStorage.setItem('authToken', token);
       await AsyncStorage.setItem('user', JSON.stringify(loggedInUser));
@@ -101,7 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const register = async (data: any): Promise<{ username: string; status: string }> => {
     try {
       const response = await authAPI.register(data);
-      const result = response.data.data;
+      const result = response.data;
       // Return registration result — caller decides where to navigate
       return { username: result.username, status: result.status };
     } catch (error: any) {
