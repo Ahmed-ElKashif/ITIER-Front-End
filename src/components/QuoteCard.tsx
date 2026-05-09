@@ -1,14 +1,17 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
-import { colors, spacing } from '../utils/theme';
+import { spacing } from '../utils/theme';
 import { Quote } from '../types';
+import { useTheme } from "../contexts/ThemeContext";
 
 interface QuoteCardProps {
   quote: Quote;
 }
 
 export const QuoteCard: React.FC<QuoteCardProps> = ({ quote }) => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.card}>
       <Icon name="format-quote-open" size={32} color={colors.primary} />
@@ -18,7 +21,7 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   card: {
     backgroundColor: colors.primary + '10',
     borderLeftWidth: 4,

@@ -6,7 +6,8 @@ import {
   StyleSheet,
   TextInputProps,
 } from 'react-native';
-import { colors, spacing } from '../utils/theme';
+import { spacing } from '../utils/theme';
+import { useTheme } from "../contexts/ThemeContext";
 
 interface InputProps extends TextInputProps {
   label: string;
@@ -14,6 +15,8 @@ interface InputProps extends TextInputProps {
 }
 
 export const Input: React.FC<InputProps> = ({ label, error, ...props }) => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
@@ -31,7 +34,7 @@ export const Input: React.FC<InputProps> = ({ label, error, ...props }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     marginBottom: spacing.md,
   },

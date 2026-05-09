@@ -12,9 +12,12 @@ import { Header } from '../../components/Header';
 import { EntryCard } from '../../components/EntryCard';
 import { entryAPI } from '../../api/endpoints';
 import { StudyEntry } from '../../types';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
+import { useTheme } from "../../contexts/ThemeContext";
 
 export const HistoryScreen = () => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [entries, setEntries] = useState<StudyEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -118,7 +121,7 @@ export const HistoryScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

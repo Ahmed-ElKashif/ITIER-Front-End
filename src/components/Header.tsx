@@ -3,7 +3,8 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
-import { colors, spacing } from '../utils/theme';
+import { spacing } from '../utils/theme';
+import { useTheme } from "../contexts/ThemeContext";
 
 interface HeaderProps {
   title: string;
@@ -11,6 +12,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ title, showLogout = false }) => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { logout, user } = useAuth();
   const insets = useSafeAreaInsets();
 
@@ -36,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({ title, showLogout = false }) => 
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',

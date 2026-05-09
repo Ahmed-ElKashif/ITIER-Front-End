@@ -25,9 +25,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import type { AuthError } from '../../contexts/AuthContext';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/types';
+import { useTheme } from "../../contexts/ThemeContext";
 
 type LoginScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -55,6 +56,8 @@ const schema = yup.object().shape({
 });
 
 export const LoginScreen: React.FC<Props> = ({ navigation }) => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -190,49 +193,75 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+const createStyles = (colors: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.surfaceAlt || colors.background },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: spacing.lg,
+    padding: spacing.xl,
   },
   header: {
     alignItems: 'center',
-    marginBottom: spacing.xl * 2,
+    marginBottom: spacing.xl * 1.5,
   },
   title: {
-    fontSize: 48,
-    fontWeight: 'bold',
+    fontSize: 56,
+    fontWeight: '900',
     color: colors.primary,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
+    letterSpacing: -1.5,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: colors.textSecondary,
     textAlign: 'center',
+    fontWeight: '500',
+    letterSpacing: 0.5,
   },
-  form: { marginBottom: spacing.xl },
-  loginButton: { marginTop: spacing.md },
-  registerLink: { marginTop: spacing.lg, alignItems: 'center' },
+  form: {
+    backgroundColor: colors.background,
+    padding: spacing.xl,
+    borderRadius: 24,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  loginButton: {
+    marginTop: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: 12,
+  },
+  registerLink: {
+    marginTop: spacing.xl,
+    alignItems: 'center',
+  },
   registerText: { fontSize: 14, color: colors.textSecondary },
-  registerTextBold: { color: colors.primary, fontWeight: '600' },
+  registerTextBold: { color: colors.primary, fontWeight: '700' },
   footer: {
     alignItems: 'center',
-    marginTop: spacing.xl,
-    padding: spacing.md,
+    marginTop: spacing.xl * 2,
+    padding: spacing.lg,
     backgroundColor: colors.surface,
-    borderRadius: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   footerTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
+    fontSize: 12,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    color: colors.textMuted || colors.textSecondary,
+    marginBottom: spacing.sm,
   },
   footerText: {
-    fontSize: 12,
+    fontSize: 13,
+    fontWeight: '500',
     color: colors.textSecondary,
-    marginBottom: 2,
+    marginBottom: 4,
   },
 });

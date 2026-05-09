@@ -14,8 +14,9 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
 import type { PendingStudent } from '../../api/types';
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface PendingStudentCardProps {
   student: PendingStudent;
@@ -30,6 +31,8 @@ export const PendingStudentCard: React.FC<PendingStudentCardProps> = ({
   onReject,
   isProcessing = false,
 }) => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
 
@@ -147,7 +150,7 @@ export const PendingStudentCard: React.FC<PendingStudentCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   card: {
     backgroundColor: colors.background,
     borderRadius: 12,

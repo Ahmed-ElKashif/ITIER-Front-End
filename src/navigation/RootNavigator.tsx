@@ -8,11 +8,13 @@ import { SupervisorTabs } from './SupervisorTabs';
 import { AdminTabs } from './AdminTabs';
 import { RootStackParamList } from './types';
 import { ActivityIndicator, View, StatusBar, Text, StyleSheet } from 'react-native';
-import { colors } from '../utils/theme';
+import { useTheme } from "../contexts/ThemeContext";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 export const RootNavigator = () => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
@@ -58,7 +60,7 @@ export const RootNavigator = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   loading: {
     flex: 1,
     justifyContent: 'center',

@@ -15,7 +15,8 @@ import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { Header } from '../../components/Header';
 import { entryAPI } from '../../api/endpoints';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
+import { useTheme } from "../../contexts/ThemeContext";
 
 const schema = yup.object().shape({
   subject: yup.string().required('Subject is required'),
@@ -44,6 +45,8 @@ const COMMON_SUBJECTS = [
 ];
 
 export const AddEntryScreen = () => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -219,7 +222,7 @@ export const AddEntryScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

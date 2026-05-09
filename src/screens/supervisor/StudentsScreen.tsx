@@ -13,9 +13,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Header } from '../../components/Header';
 import { StudentCard } from '../../components/StudentCard';
 import apiClient from '../../api/client';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
+import { useTheme } from "../../contexts/ThemeContext";
 
 export const StudentsScreen = () => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [students, setStudents] = useState<any[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -153,7 +156,7 @@ export const StudentsScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   center: {
     flex: 1,

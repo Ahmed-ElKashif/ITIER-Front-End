@@ -5,22 +5,27 @@
  */
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
-import { colors } from '../utils/theme';
+import { useTheme } from "../contexts/ThemeContext";
 
 interface LoadingOverlayProps {
   message?: string;
 }
 
-export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ message }) => (
-  <View style={styles.overlay}>
-    <View style={styles.card}>
-      <ActivityIndicator size="large" color={colors.primary} />
-      {message ? <Text style={styles.message}>{message}</Text> : null}
-    </View>
-  </View>
-);
+export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ message }) => {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
 
-const styles = StyleSheet.create({
+  return (
+    <View style={styles.overlay}>
+      <View style={styles.card}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        {message ? <Text style={styles.message}>{message}</Text> : null}
+      </View>
+    </View>
+  );
+};
+
+const createStyles = (colors: any) => StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.45)',

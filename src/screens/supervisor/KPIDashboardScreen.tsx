@@ -22,9 +22,12 @@ import { MetricCard } from '../../components/domain/MetricCard';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { Header } from '../../components/Header';
 import { useAnalytics } from '../../hooks/useAnalytics';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
+import { useTheme } from "../../contexts/ThemeContext";
 
 export const KPIDashboardScreen: React.FC = () => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const {
     overview,
     isLoading,
@@ -193,7 +196,7 @@ export const KPIDashboardScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   center: {
     flex: 1,

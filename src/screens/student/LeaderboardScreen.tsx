@@ -13,11 +13,14 @@ import { LeaderboardCard } from '../../components/LeaderboardCard';
 import { leaderboardAPI } from '../../api/endpoints';
 import { useAuth } from '../../contexts/AuthContext';
 import { LeaderboardEntry } from '../../types';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
+import { useTheme } from "../../contexts/ThemeContext";
 
 type LeaderboardType = 'daily' | 'weekly';
 
 export const LeaderboardScreen = () => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<LeaderboardType>('daily');
   const [rankings, setRankings] = useState<LeaderboardEntry[]>([]);
@@ -132,7 +135,7 @@ export const LeaderboardScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

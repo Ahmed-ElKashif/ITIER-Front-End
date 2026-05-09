@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
-import { colors, spacing } from '../utils/theme';
+import { spacing } from '../utils/theme';
+import { useTheme } from "../contexts/ThemeContext";
 
 interface StudentCardProps {
   student: {
@@ -16,6 +17,8 @@ interface StudentCardProps {
 }
 
 export const StudentCard: React.FC<StudentCardProps> = ({ student, onPress }) => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Never';
     const date = new Date(dateString);
@@ -64,7 +67,7 @@ export const StudentCard: React.FC<StudentCardProps> = ({ student, onPress }) =>
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   card: {
     backgroundColor: colors.background,
     borderRadius: 12,

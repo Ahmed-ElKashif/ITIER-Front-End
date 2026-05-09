@@ -22,7 +22,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { AuthStackParamList } from '../../navigation/types';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
+import { useTheme } from "../../contexts/ThemeContext";
 
 type NavigationProp = StackNavigationProp<AuthStackParamList, 'PendingApproval'>;
 type RouteType = RouteProp<AuthStackParamList, 'PendingApproval'>;
@@ -36,6 +37,8 @@ export const PendingApprovalScreen: React.FC<Props> = ({
   navigation,
   route,
 }) => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { username } = route.params;
   const insets = useSafeAreaInsets();
 
@@ -131,7 +134,7 @@ export const PendingApprovalScreen: React.FC<Props> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: colors.background,

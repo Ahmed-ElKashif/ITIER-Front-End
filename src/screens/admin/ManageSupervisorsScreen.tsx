@@ -27,8 +27,9 @@ import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { useAdmin } from '../../hooks/useAdmin';
 import { useFormValidation, Rules } from '../../hooks/useFormValidation';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
 import type { SupervisorRecord } from '../../api/endpoints/admin.api';
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface CreateForm {
   email: string;
@@ -42,7 +43,10 @@ const validationRules = {
 
 // ── SupervisorCard — presentational (SRP) ─────────────────────────────────────
 
-const SupervisorCard: React.FC<{ item: SupervisorRecord }> = ({ item }) => (
+const SupervisorCard: React.FC<{ item: SupervisorRecord }> = ({ item }) => {
+  const { colors } = useTheme();
+  const cardStyles = React.useMemo(() => createCardStyles(colors), [colors]);
+  return (
   <View style={cardStyles.card}>
     <View style={cardStyles.row}>
       <View style={cardStyles.avatar}>
@@ -68,11 +72,14 @@ const SupervisorCard: React.FC<{ item: SupervisorRecord }> = ({ item }) => (
       <Text style={cardStyles.noTrack}>No track created yet</Text>
     )}
   </View>
-);
+  );
+};
 
 // ── Main Screen ───────────────────────────────────────────────────────────────
 
 export const ManageSupervisorsScreen: React.FC = () => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { supervisors, isLoading, fetchSupervisors, createSupervisor } = useAdmin();
   const { errors, validate, validateAll, clearAllErrors } =
     useFormValidation<CreateForm>(validationRules);
@@ -231,7 +238,7 @@ export const ManageSupervisorsScreen: React.FC = () => {
 
 // ── Styles ─────────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   subHeader: {
     flexDirection: 'row',
@@ -291,7 +298,7 @@ const styles = StyleSheet.create({
   modalBtn: { flex: 1 },
 });
 
-const cardStyles = StyleSheet.create({
+const createCardStyles = (colors: any) => StyleSheet.create({
   card: {
     backgroundColor: colors.background,
     borderRadius: 12,

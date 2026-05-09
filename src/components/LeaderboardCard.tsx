@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
-import { colors, spacing } from '../utils/theme';
+import { spacing } from '../utils/theme';
 import { LeaderboardEntry } from '../types';
+import { useTheme } from "../contexts/ThemeContext";
 
 interface LeaderboardCardProps {
   entry: LeaderboardEntry;
@@ -13,6 +14,8 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
   entry,
   isCurrentUser,
 }) => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const getRankColor = (rank: number) => {
     switch (rank) {
       case 1:
@@ -62,7 +65,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',

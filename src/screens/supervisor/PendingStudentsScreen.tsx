@@ -15,9 +15,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { PendingStudentCard } from '../../components/domain/PendingStudentCard';
 import { useApproval } from '../../hooks/useApproval';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
+import { useTheme } from "../../contexts/ThemeContext";
 
 export const PendingStudentsScreen: React.FC = () => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { pendingStudents, isLoading, fetchPending, approveStudent, rejectStudent } =
     useApproval();
   const [processingId, setProcessingId] = useState<number | null>(null);
@@ -107,7 +110,7 @@ export const PendingStudentsScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.surface,

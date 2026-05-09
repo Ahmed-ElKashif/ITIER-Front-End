@@ -6,7 +6,8 @@ import {
   ActivityIndicator,
   ViewStyle,
 } from 'react-native';
-import { colors, spacing } from '../utils/theme';
+import { spacing } from '../utils/theme';
+import { useTheme } from "../contexts/ThemeContext";
 
 interface ButtonProps {
   title: string;
@@ -25,13 +26,15 @@ export const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   style,
 }) => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const isDisabled = disabled || loading;
 
   return (
     <TouchableOpacity
       style={[
         styles.button,
-        styles[variant],
+        createStyles[variant],
         isDisabled && styles.disabled,
         style,
       ]}
@@ -42,13 +45,13 @@ export const Button: React.FC<ButtonProps> = ({
       {loading ? (
         <ActivityIndicator color={variant === 'outline' ? colors.primary : '#fff'} />
       ) : (
-        <Text style={[styles.text, styles[`${variant}Text`]]}>{title}</Text>
+        <Text style={[styles.text, createStyles[`${variant}Text`]]}>{title}</Text>
       )}
     </TouchableOpacity>
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   button: {
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,

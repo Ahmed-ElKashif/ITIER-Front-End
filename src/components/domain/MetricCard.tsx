@@ -6,7 +6,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface TrendProps {
   direction: 'up' | 'down';
@@ -28,10 +29,13 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   value,
   subtitle,
   iconName,
-  iconColor = colors.primary,
+  iconColor: propIconColor,
   trend,
   style,
 }) => {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const iconColor = propIconColor || colors.primary;
   return (
     <View style={[styles.card, style]}>
       {/* Icon */}
@@ -71,7 +75,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   card: {
     flexDirection: 'row',
     backgroundColor: colors.background,

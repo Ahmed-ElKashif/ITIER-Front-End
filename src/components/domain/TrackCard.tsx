@@ -11,8 +11,9 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
 import type { TrackWithStats } from '../../api/types';
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface TrackCardProps {
   track: TrackWithStats;
@@ -25,6 +26,8 @@ export const TrackCard: React.FC<TrackCardProps> = ({
   isSelected,
   onSelect,
 }) => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const isDisabled = track.isFull;
   const capacityText = track.maxStudents
     ? `${track.currentStudents}/${track.maxStudents} students`
@@ -110,7 +113,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   card: {
     backgroundColor: colors.background,
     borderRadius: 12,

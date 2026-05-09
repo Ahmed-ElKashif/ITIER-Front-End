@@ -6,7 +6,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing } from '../utils/theme';
+import { spacing, colors } from '../utils/theme';
 
 interface Props {
   children: ReactNode;

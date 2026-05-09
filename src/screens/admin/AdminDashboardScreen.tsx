@@ -23,9 +23,12 @@ import { MetricCard } from '../../components/domain/MetricCard';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { Header } from '../../components/Header';
 import { useAdmin } from '../../hooks/useAdmin';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
+import { useTheme } from "../../contexts/ThemeContext";
 
 export const AdminDashboardScreen: React.FC = () => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { dashboardStats, isLoading, fetchDashboard } = useAdmin();
 
   useEffect(() => {
@@ -159,7 +162,7 @@ export const AdminDashboardScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
   loadingText: { color: colors.textSecondary, fontSize: 14 },

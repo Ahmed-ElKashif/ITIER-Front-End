@@ -15,8 +15,9 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { TrackCard } from './TrackCard';
 import { useTracks } from '../../hooks/useTracks';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
 import type { TrackWithStats } from '../../api/types';
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface TrackSelectorProps {
   selectedTrackId: number | null;
@@ -27,6 +28,8 @@ export const TrackSelector: React.FC<TrackSelectorProps> = ({
   selectedTrackId,
   onSelect,
 }) => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { tracks, isLoading, error, refetch } = useTracks();
 
   if (isLoading) {
@@ -83,7 +86,7 @@ export const TrackSelector: React.FC<TrackSelectorProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   center: {
     alignItems: 'center',
     paddingVertical: spacing.lg,

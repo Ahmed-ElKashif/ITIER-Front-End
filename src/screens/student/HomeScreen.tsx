@@ -11,9 +11,12 @@ import { QuoteCard } from '../../components/QuoteCard';
 import { StatsCard } from '../../components/StatsCard';
 import { quoteAPI, entryAPI } from '../../api/endpoints';
 import { Quote } from '../../types';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
+import { useTheme } from "../../contexts/ThemeContext";
 
 export const HomeScreen = () => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [weeklyHours, setWeeklyHours] = useState('0');
   const [monthlyHours, setMonthlyHours] = useState('0');
@@ -105,7 +108,7 @@ export const HomeScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

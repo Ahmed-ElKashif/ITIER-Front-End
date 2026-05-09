@@ -4,7 +4,8 @@
  */
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface ProgressBarProps {
   label?: string;
@@ -18,9 +19,12 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   label,
   value,
   max = 100,
-  color = colors.primary,
+  color: propColor,
   showPercentage = false,
 }) => {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const color = propColor || colors.primary;
   const percentage = max > 0 ? Math.min((value / max) * 100, 100) : 0;
 
   return (
@@ -45,7 +49,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     marginBottom: spacing.sm,
   },

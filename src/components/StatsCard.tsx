@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
-import { colors, spacing } from '../utils/theme';
+import { spacing } from '../utils/theme';
+import { useTheme } from "../contexts/ThemeContext";
 
 interface StatsCardProps {
   title: string;
@@ -16,8 +17,12 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   value,
   subtitle,
   icon,
-  color = colors.primary,
+  color: propColor,
 }) => {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const color = propColor || colors.primary;
+
   return (
     <View style={[styles.card, { borderLeftColor: color }]}>
       <View style={styles.iconContainer}>
@@ -32,7 +37,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   card: {
     flexDirection: 'row',
     backgroundColor: colors.background,

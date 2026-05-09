@@ -21,10 +21,13 @@ import { QuoteCard } from '../../components/QuoteCard';
 import apiClient from '../../api/client';
 import { createTrack } from '../../api/endpoints/track.api';
 import { quoteAPI } from '../../api/endpoints';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
 import { Quote } from '../../types';
+import { useTheme } from "../../contexts/ThemeContext";
 
 export const DashboardScreen = () => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [trackData, setTrackData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -251,7 +254,7 @@ export const DashboardScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
-import { colors, spacing } from '../utils/theme';
+import { spacing } from '../utils/theme';
 import { StudyEntry } from '../types';
+import { useTheme } from "../contexts/ThemeContext";
 
 interface EntryCardProps {
   entry: StudyEntry;
@@ -11,6 +12,8 @@ interface EntryCardProps {
 }
 
 export const EntryCard: React.FC<EntryCardProps> = ({ entry, onEdit, onDelete }) => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -64,7 +67,7 @@ export const EntryCard: React.FC<EntryCardProps> = ({ entry, onEdit, onDelete })
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   card: {
     backgroundColor: colors.background,
     borderRadius: 12,

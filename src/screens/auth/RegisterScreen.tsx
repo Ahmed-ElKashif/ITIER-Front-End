@@ -29,10 +29,11 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { TrackSelector } from '../../components/domain/TrackSelector';
-import { colors, spacing } from '../../utils/theme';
+import { spacing } from '../../utils/theme';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/types';
 import type { TrackWithStats } from '../../api/types';
+import { useTheme } from "../../contexts/ThemeContext";
 
 type RegisterScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -80,6 +81,8 @@ const schema = yup.object().shape({
 });
 
 export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
+    const { colors } = useTheme();
+      const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<TrackWithStats | null>(
@@ -277,39 +280,53 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceAlt || colors.background,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: spacing.lg,
-    paddingTop: spacing.xl * 2,
+    padding: spacing.xl,
+    paddingTop: spacing.xl * 1.5,
   },
   header: {
-    marginBottom: spacing.xl,
+    alignItems: 'center',
+    marginBottom: spacing.xl * 1.5,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: colors.text,
+    fontSize: 40,
+    fontWeight: '900',
+    color: colors.primary,
     marginBottom: spacing.xs,
+    letterSpacing: -1,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: colors.textSecondary,
+    fontWeight: '500',
+    letterSpacing: 0.5,
   },
   form: {
+    backgroundColor: colors.background,
+    padding: spacing.xl,
+    borderRadius: 24,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
     marginBottom: spacing.xl,
   },
   sectionLabel: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 12,
+    fontWeight: '800',
     color: colors.textSecondary,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: spacing.sm,
+    letterSpacing: 1,
+    marginBottom: spacing.md,
     marginTop: spacing.xs,
   },
   sectionDivider: {
@@ -325,9 +342,11 @@ const styles = StyleSheet.create({
   },
   registerButton: {
     marginTop: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: 12,
   },
   loginLink: {
-    marginTop: spacing.lg,
+    marginTop: spacing.xl,
     alignItems: 'center',
   },
   loginText: {
@@ -336,7 +355,7 @@ const styles = StyleSheet.create({
   },
   loginTextBold: {
     color: colors.primary,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   trackContainer: {
     marginBottom: spacing.md,
@@ -350,10 +369,10 @@ const styles = StyleSheet.create({
   trackSelector: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 8,
+    borderRadius: 12,
     padding: spacing.md,
-    backgroundColor: colors.background,
-    minHeight: 50,
+    backgroundColor: colors.surface,
+    minHeight: 52,
     justifyContent: 'center',
   },
   trackSelectorText: {
@@ -370,14 +389,14 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     padding: spacing.lg,
     maxHeight: '70%',
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '800',
     color: colors.text,
     marginBottom: spacing.md,
     textAlign: 'center',
@@ -399,12 +418,12 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     padding: spacing.md,
     backgroundColor: colors.surface,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
   },
   modalCloseButtonText: {
     color: colors.text,
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 16,
   },
 });

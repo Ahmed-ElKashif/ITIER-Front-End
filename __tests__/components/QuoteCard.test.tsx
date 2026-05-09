@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import { QuoteCard } from './QuoteCard';
+import { QuoteCard } from '../../src/components/QuoteCard';
 
 describe('QuoteCard', () => {
   it('renders the quote text and author correctly', () => {
