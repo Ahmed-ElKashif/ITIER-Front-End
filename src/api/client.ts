@@ -4,7 +4,6 @@
  * and helpers for token management.
  *
  * Key features:
- * - 30s timeout (Vercel cold starts can take 8-10s)
  * - Auto token injection
  * - Dev-mode request/response logging (📤 / 📥)
  * - Structured error transformation
@@ -13,15 +12,25 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { Platform } from 'react-native';
+
 const TOKEN_KEY = 'authToken';
 const USER_KEY = 'user';
 
-const LIVE_BACKEND_URL =
-  'https://itierstudytracker-ahmed-elkashifs-projects.vercel.app/api/v1';
+// ── Environment Configuration ──────────────────────────────────────────────────
+const DEV_PC_URL = 'http://localhost:3000/api/v1';
+const DEV_MOBILE_URL = 'http://192.168.1.3:3000/api/v1';
+
+// 🛠️ Toggle for testing:
+const USE_PHYSICAL_DEVICE = true; // Set to true to use your mobile IP (192.168.1.3)
+
+const BASE_URL = USE_PHYSICAL_DEVICE || Platform.OS !== 'web'
+  ? DEV_MOBILE_URL
+  : DEV_PC_URL;
 
 const apiClient: AxiosInstance = axios.create({
-  baseURL: LIVE_BACKEND_URL,
-  timeout: 30000, // 30s — accounts for Vercel cold starts
+  baseURL: BASE_URL,
+  timeout: 30000, // 30s
   headers: {
     'Content-Type': 'application/json',
   },
@@ -70,7 +79,7 @@ export const removeToken = async (): Promise<void> => {
 export const checkAPIHealth = async (): Promise<boolean> => {
   try {
     // Health is at root (not /api/v1/health), strip the /api/v1 prefix
-    const url = LIVE_BACKEND_URL.replace('/api/v1', '') + '/health';
+    const url = BASE_URL.replace('/api/v1', '') + '/health';
     const response = await axios.get(url, { timeout: 10000 });
     return response.status === 200;
   } catch {
@@ -120,7 +129,7 @@ apiClient.interceptors.response.use(
     const status = error.response?.status;
     const data = error.response?.data as any;
 
-    if (__DEV__) {
+    if (__DEV__ && status !== 403) {
       console.error('❌ API Error:', {
         message: error.message,
         status,

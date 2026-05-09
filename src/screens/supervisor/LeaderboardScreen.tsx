@@ -34,7 +34,7 @@ export const LeaderboardScreen = () => {
     };
 
     try {
-      if (!user) return;
+      if (!user || !user.trackId) return;
       if (isRefresh) setIsRefreshing(true);
       else setIsLoading(true);
 

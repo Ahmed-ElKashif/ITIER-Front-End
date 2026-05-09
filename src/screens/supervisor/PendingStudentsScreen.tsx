@@ -11,6 +11,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { PendingStudentCard } from '../../components/domain/PendingStudentCard';
 import { useApproval } from '../../hooks/useApproval';
@@ -20,6 +21,7 @@ export const PendingStudentsScreen: React.FC = () => {
   const { pendingStudents, isLoading, fetchPending, approveStudent, rejectStudent } =
     useApproval();
   const [processingId, setProcessingId] = useState<number | null>(null);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     fetchPending();
@@ -53,7 +55,7 @@ export const PendingStudentsScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
         <Text style={styles.title}>Pending Approvals</Text>
         <View style={styles.countBadge}>
           <Text style={styles.countText}>{pendingStudents.length}</Text>
@@ -123,7 +125,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.sm,
     backgroundColor: colors.background,
     borderBottomWidth: 1,

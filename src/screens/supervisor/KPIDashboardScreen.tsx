@@ -54,17 +54,8 @@ export const KPIDashboardScreen: React.FC = () => {
   const topStudents = getTopStudents(5);
   const atRiskStudents = getAtRiskStudents();
 
-  // Build subject list from overview if available
-  const subjects = overview?.students
-    .flatMap(s => s.subjects)
-    .reduce<Record<string, number>>((acc, subject) => {
-      acc[subject] = (acc[subject] ?? 0) + 1;
-      return acc;
-    }, {});
-  const subjectEntries = Object.entries(subjects ?? {})
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 6);
-  const maxSubjectCount = subjectEntries[0]?.[1] ?? 1;
+  // Backend only returns the most studied subject for the whole track
+  const mostStudiedSubject = overview?.trackStats?.mostStudiedSubject ?? 'N/A';
 
   return (
     <View style={styles.container}>
@@ -82,16 +73,11 @@ export const KPIDashboardScreen: React.FC = () => {
         }
       >
         {/* Track info banner */}
-        {overview?.track && (
+        {overview?.trackName && (
           <View style={styles.trackBanner}>
             <Ionicons name="school" size={20} color={colors.secondary} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.trackName}>{overview.track.name}</Text>
-              {overview.track.description ? (
-                <Text style={styles.trackDesc} numberOfLines={1}>
-                  {overview.track.description}
-                </Text>
-              ) : null}
+              <Text style={styles.trackName}>{overview.trackName}</Text>
             </View>
           </View>
         )}
@@ -109,7 +95,7 @@ export const KPIDashboardScreen: React.FC = () => {
 
         <MetricCard
           title="Avg Weekly Hours"
-          value={overview?.stats.averageWeeklyHours ?? '0'}
+          value={overview?.trackStats?.averageWeeklyHours ?? '0'}
           subtitle="Hours per student per week"
           iconName="time-outline"
           iconColor={colors.primary}
@@ -118,30 +104,22 @@ export const KPIDashboardScreen: React.FC = () => {
         <MetricCard
           title="Total Students"
           value={overview?.totalStudents ?? '—'}
-          subtitle={
-            overview?.track.maxStudents
-              ? `Capacity: ${overview.track.maxStudents}`
-              : 'No capacity limit set'
-          }
+          subtitle="Students enrolled"
           iconName="people-outline"
           iconColor={colors.primary}
         />
 
         {/* Subject Distribution */}
-        {subjectEntries.length > 0 && (
+        {mostStudiedSubject !== 'N/A' && (
           <>
-            <Text style={styles.sectionTitle}>Most Studied Subjects</Text>
+            <Text style={styles.sectionTitle}>Most Studied Subject</Text>
             <View style={styles.card}>
-              {subjectEntries.map(([subject, count]) => (
-                <ProgressBar
-                  key={subject}
-                  label={subject}
-                  value={count}
-                  max={maxSubjectCount}
-                  color={colors.primary}
-                  showPercentage
-                />
-              ))}
+              <MetricCard
+                title="Top Subject"
+                value={mostStudiedSubject}
+                iconName="book-outline"
+                iconColor={colors.secondary}
+              />
             </View>
           </>
         )}
@@ -163,8 +141,8 @@ export const KPIDashboardScreen: React.FC = () => {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.studentName}>{student.fullName}</Text>
                     <Text style={styles.studentDetail}>
-                      {student.lastActive
-                        ? `Last active: ${new Date(student.lastActive).toLocaleDateString()}`
+                      {student.lastStudyDate
+                        ? `Last active: ${new Date(student.lastStudyDate).toLocaleDateString()}`
                         : 'No activity recorded'}
                     </Text>
                   </View>
@@ -190,7 +168,7 @@ export const KPIDashboardScreen: React.FC = () => {
                   <Text style={[styles.studentName, { flex: 1 }]}>
                     {student.fullName}
                   </Text>
-                  <Text style={styles.hoursText}>{student.totalHours}h</Text>
+                  <Text style={styles.hoursText}>{student.monthlyHours}h</Text>
                 </View>
               ))}
             </View>
@@ -201,9 +179,9 @@ export const KPIDashboardScreen: React.FC = () => {
         {!overview && !isLoading && (
           <View style={styles.emptyState}>
             <Ionicons name="analytics-outline" size={56} color={colors.textSecondary} />
-            <Text style={styles.emptyText}>No analytics data yet</Text>
+            <Text style={styles.emptyText}>No analytics data available</Text>
             <Text style={styles.emptySubtext}>
-              Data appears once students start logging study hours
+              Please ensure you have created a track in the Dashboard and that students have logged study hours.
             </Text>
             <TouchableOpacity style={styles.retryBtn} onPress={fetchAnalytics}>
               <Text style={styles.retryText}>Refresh</Text>

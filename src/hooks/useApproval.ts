@@ -28,10 +28,12 @@ export const useApproval = (): UseApprovalReturn => {
       const response = await ApprovalAPI.getPendingStudents();
       setPendingStudents(response.data);
     } catch (error: any) {
-      Alert.alert(
-        'Error',
-        error.response?.data?.error || 'Failed to fetch pending students',
-      );
+      if (error.response?.status !== 403) {
+        Alert.alert(
+          'Error',
+          error.response?.data?.error || 'Failed to fetch pending students',
+        );
+      }
     } finally {
       setIsLoading(false);
     }

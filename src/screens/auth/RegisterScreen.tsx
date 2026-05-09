@@ -77,7 +77,6 @@ const schema = yup.object().shape({
     .string()
     .required('Please confirm your password')
     .oneOf([yup.ref('password')], 'Passwords must match'),
-  trackId: yup.number().min(1, 'Please select a track').required('Please select a track'),
 });
 
 export const RegisterScreen: React.FC<Props> = ({ navigation }) => {

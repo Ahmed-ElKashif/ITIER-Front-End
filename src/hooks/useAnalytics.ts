@@ -15,24 +15,16 @@ export interface StudentActivity {
   username: string;
   weeklyHours: string;
   monthlyHours: string;
-  totalHours: string;
-  lastActive: string | null;
-  subjects: string[];
+  lastStudyDate: string | null;
 }
 
 export interface TrackOverview {
-  track: {
-    id: number;
-    name: string;
-    description: string | null;
-    maxStudents: number | null;
-  };
+  trackName: string;
   totalStudents: number;
   students: StudentActivity[];
-  stats: {
+  trackStats: {
     averageWeeklyHours: string;
-    topSubject: string | null;
-    mostActiveStudentId: number | null;
+    mostStudiedSubject: string;
   };
 }
 
@@ -55,10 +47,12 @@ export const useAnalytics = (): UseAnalyticsReturn => {
       const response = await apiClient.get('/supervisor/track-overview');
       setOverview(response.data.data);
     } catch (error: any) {
-      Alert.alert(
-        'Error',
-        error.response?.data?.error || 'Failed to load analytics',
-      );
+      if (error.response?.status !== 403) {
+        Alert.alert(
+          'Error',
+          error.response?.data?.error || 'Failed to load analytics',
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -78,7 +72,7 @@ export const useAnalytics = (): UseAnalyticsReturn => {
     (limit = 5): StudentActivity[] => {
       if (!overview) return [];
       return [...overview.students]
-        .sort((a, b) => parseFloat(b.totalHours) - parseFloat(a.totalHours))
+        .sort((a, b) => parseFloat(b.monthlyHours) - parseFloat(a.monthlyHours))
         .slice(0, limit);
     },
     [overview],

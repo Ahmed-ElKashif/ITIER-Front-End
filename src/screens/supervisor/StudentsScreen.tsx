@@ -34,9 +34,10 @@ export const StudentsScreen = () => {
       setStudents(studentList);
       setFilteredStudents(studentList);
     } catch (error: any) {
-      console.error('Fetch students error:', error);
       if (error.response?.status === 403) {
         setNoTrack(true);
+      } else {
+        console.error('Fetch students error:', error);
       }
     } finally {
       setIsLoading(false);
